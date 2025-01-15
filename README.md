@@ -11,7 +11,6 @@ A simple video conversion tool that helps you convert videos between different f
 
 #### Using Homebrew (Recommended)
 
-
 ```bash
 brew install ffmpeg
 ```
