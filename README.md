@@ -14,3 +14,10 @@ A simple video conversion tool that helps you convert videos between different f
 ```bash
 brew install ffmpeg
 ```
+
+#### Running the application
+
+```bash
+npm install
+npm run start
+```
