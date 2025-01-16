@@ -1,19 +1,41 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs');
 require('@electron/remote/main').initialize();
 
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
+    // For development, check both common FFmpeg locations
     if (process.env.NODE_ENV === 'development') {
-        return '/opt/homebrew/bin/ffmpeg';  // Local development path
+        const possiblePaths = [
+            '/opt/homebrew/bin/ffmpeg',    // M1/M2 Mac Homebrew path
+            '/usr/local/bin/ffmpeg',       // Intel Mac Homebrew path
+            '/usr/bin/ffmpeg'              // System path
+        ];
+
+        const validPath = possiblePaths.find(p => fs.existsSync(p));
+        if (!validPath) {
+            console.error('FFmpeg not found in any expected location!');
+            console.log('Checked paths:', possiblePaths);
+            throw new Error('FFmpeg not found');
+        }
+        
+        console.log('Development mode, using FFmpeg at:', validPath);
+        return validPath;
     }
-    // In production, use the bundled ffmpeg
+
+    console.log('Production mode, using bundled FFmpeg');
     return path.join(process.resourcesPath, 'ffmpeg');
 };
 
+// Log the FFmpeg path for debugging
+const ffmpegPath = getFfmpegPath();
+console.log('Using FFmpeg path:', ffmpegPath);
+console.log('Path exists:', fs.existsSync(ffmpegPath));
+
 // Set FFmpeg path for fluent-ffmpeg
-ffmpeg.setFfmpegPath(getFfmpegPath());
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 function createWindow() {
     const win = new BrowserWindow({

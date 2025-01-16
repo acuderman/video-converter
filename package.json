@@ -20,15 +20,10 @@
     "files": [
       "**/*"
     ],
-    "extraFiles": [
-      {
-        "from": "${env.FFMPEG_PATH}",
-        "to": "ffmpeg"
-      }
-    ],
-    "asarUnpack": [
-      "ffmpeg"
-    ]
+    "extraResources": {
+      "from": "/opt/homebrew/bin/ffmpeg",
+      "to": "./ffmpeg"
+    }
   },
   "dependencies": {
     "fluent-ffmpeg": "latest",

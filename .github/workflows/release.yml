@@ -25,7 +25,7 @@ jobs:
     - name: Install FFmpeg
       run: |
         brew install ffmpeg
-        echo "FFMPEG_PATH=$(which ffmpeg)" >> $GITHUB_ENV
+        echo "FFMPEG_PATH=/opt/homebrew/bin/ffmpeg" >> $GITHUB_ENV
 
     - name: Calculate new version
       id: version
