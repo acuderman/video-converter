@@ -65,9 +65,9 @@ jobs:
       run: npm install
 
     - name: Build MacOS App
-      run: npm run build:mac
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: npm run build:mac
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -82,7 +82,20 @@ jobs:
         body: |
           Release ${{ steps.version.outputs.new_version }}
           
-          Changes in this release:
+          ## Installation Instructions
+          
+          ### Method 1: Quick Install (Terminal)
+          1. Download and install the app
+          2. Open Terminal
+          3. Run: `xattr -cr "/Applications/Video Converter.app"`
+          4. Open the app from Applications folder
+          
+          ### Method 2: Manual Install
+          1. Download and install the app
+          2. Right-click the app and hold Option key
+          3. Select "Open" and confirm
+          
+          ## Changes in this release:
           ${{ join(github.event.commits.*.message, '\n') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 

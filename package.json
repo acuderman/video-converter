@@ -8,16 +8,14 @@
     "build:mac": "electron-builder --mac"
   },
   "build": {
-    "appId": "com.videoconverter.app",
+    "appId": "com.your.videoconverter",
     "productName": "Video Converter",
     "mac": {
-      "category": "public.app-category.video",
       "target": ["dmg", "zip"],
-      "icon": "build/icon.icns",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "identity": null
+    },
+    "dmg": {
+      "sign": false
     }
   },
   "dependencies": {
