@@ -9,38 +9,33 @@ on:
 
 jobs:
   build-and-release:
-    # Only run if direct push to main or if PR was merged (not closed without merge)
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: macos-latest
     
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Fetch all history for tags
+        fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        python-version: '3.10'
-
+        node-version: '18'
+        
     - name: Calculate new version
       id: version
       run: |
-        # Get latest tag
         latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
         echo "Latest tag: $latest_tag"
         
-        # Remove 'v' prefix and split into array
         IFS='.' read -ra VERSION <<< "${latest_tag#v}"
         MAJOR=${VERSION[0]}
         MINOR=${VERSION[1]}
         PATCH=${VERSION[2]}
         
-        # Get commit messages since last tag
         COMMITS=$(git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"%s")
         
-        # Determine version bump type based on commit messages
-        BUMP_TYPE="patch"  # Default to patch
+        BUMP_TYPE="patch"
         
         while IFS= read -r commit; do
           if [[ $commit == *"BREAKING CHANGE:"* ]] || [[ $commit == *"!"* ]]; then
@@ -51,7 +46,6 @@ jobs:
           fi
         done <<< "$COMMITS"
         
-        # Increment version based on bump type
         case $BUMP_TYPE in
           "major")
             NEW_VERSION="$((MAJOR + 1)).0.0"
@@ -66,23 +60,14 @@ jobs:
         
         echo "new_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
         echo "New version will be: v$NEW_VERSION"
-        
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pyinstaller
+      run: npm install
 
     - name: Build MacOS App
-      run: |
-        pyinstaller --name video-converter \
-                   --onefile \
-                   --windowed \
-                   --clean \
-                   src/main.py
+      run: npm run build:mac
 
     - name: Create Release
-      id: create_release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.version.outputs.new_version }}
@@ -90,7 +75,7 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          dist/video-converter
+          dist/*.dmg
         body: |
           Release ${{ steps.version.outputs.new_version }}
           
