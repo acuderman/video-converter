@@ -66,6 +66,8 @@ jobs:
 
     - name: Build MacOS App
       run: npm run build:mac
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -76,10 +78,11 @@ jobs:
         prerelease: false
         files: |
           dist/*.dmg
+          dist/*.zip
         body: |
           Release ${{ steps.version.outputs.new_version }}
           
           Changes in this release:
           ${{ join(github.event.commits.*.message, '\n') }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} 
