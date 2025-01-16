@@ -36,7 +36,8 @@ const defaultSettings = {
     preset: 'slow',
     videoBitrate: 3000,
     audioBitrate: 128,
-    bufferSize: 6000
+    bufferSize: 6000,
+    suffix: ""
 };
 
 let currentSettings = { ...defaultSettings };
@@ -79,7 +80,7 @@ async function processNextInQueue() {
     progress.style.display = 'block';
     
     const path = require('path');
-    const outputPath = path.join(outputDirectory, nextFile.name.replace(/\.[^/.]+$/, "") + "_720p.mp4");
+    const outputPath = path.join(outputDirectory, nextFile.name.replace(/\.[^/.]+$/, "") + currentSettings.suffix + ".mp4");
     
     if (nextFile.path) {
         // For files selected through file dialog
@@ -217,5 +218,34 @@ function initializeSettings() {
                 element.value = defaultSettings[setting];
             }
         });
+    });
+}
+
+function processVideo(inputPath) {
+    const settings = {
+        scale: parseInt(document.getElementById('resolution').value),
+        crf: parseInt(document.getElementById('quality').value),
+        preset: document.getElementById('preset').value,
+        videoBitrate: parseInt(document.getElementById('videoBitrate').value),
+        audioBitrate: parseInt(document.getElementById('audioBitrate').value),
+        bufferSize: parseInt(document.getElementById('bufferSize').value),
+        suffix: document.getElementById('suffix').value.trim() // Get suffix value
+    };
+
+    // Get the file extension
+    const ext = path.extname(inputPath);
+    // Get the file name without extension
+    const basename = path.basename(inputPath, ext);
+    // Create output path with optional suffix
+    const outputPath = path.join(
+        path.dirname(inputPath),
+        `${basename}${settings.suffix}${ext}`
+    );
+
+    // Send to main process
+    ipcRenderer.send('process-video', {
+        inputPath,
+        outputPath,
+        settings
     });
 } 

@@ -7,7 +7,7 @@ require('@electron/remote/main').initialize();
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
     // For development, check both common FFmpeg locations
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
         const possiblePaths = [
             '/opt/homebrew/bin/ffmpeg',    // M1/M2 Mac Homebrew path
             '/usr/local/bin/ffmpeg',       // Intel Mac Homebrew path
@@ -25,8 +25,10 @@ const getFfmpegPath = () => {
         return validPath;
     }
 
-    console.log('Production mode, using bundled FFmpeg');
-    return path.join(process.resourcesPath, 'ffmpeg');
+    // Production mode
+    const resourcePath = path.join(process.resourcesPath, 'ffmpeg');
+    console.log('Production mode, using bundled FFmpeg at:', resourcePath);
+    return resourcePath;
 };
 
 // Log the FFmpeg path for debugging
