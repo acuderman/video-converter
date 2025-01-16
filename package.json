@@ -16,7 +16,13 @@
     },
     "dmg": {
       "sign": false
-    }
+    },
+    "extraResources": [
+      {
+        "from": "node_modules/ffmpeg-static/ffmpeg",
+        "to": "ffmpeg"
+      }
+    ]
   },
   "dependencies": {
     "fluent-ffmpeg": "latest",
