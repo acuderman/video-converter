@@ -21,7 +21,12 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-        
+
+    - name: Install FFmpeg
+      run: |
+        brew install ffmpeg
+        echo "FFMPEG_PATH=$(which ffmpeg)" >> $GITHUB_ENV
+
     - name: Calculate new version
       id: version
       run: |
@@ -67,6 +72,7 @@ jobs:
     - name: Build MacOS App
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        FFMPEG_PATH: ${{ env.FFMPEG_PATH }}
       run: npm run build:mac
 
     - name: Create Release

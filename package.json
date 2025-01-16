@@ -17,11 +17,17 @@
     "dmg": {
       "sign": false
     },
-    "extraResources": [
+    "files": [
+      "**/*"
+    ],
+    "extraFiles": [
       {
-        "from": "node_modules/ffmpeg-static/ffmpeg",
+        "from": "${env.FFMPEG_PATH}",
         "to": "ffmpeg"
       }
+    ],
+    "asarUnpack": [
+      "ffmpeg"
     ]
   },
   "dependencies": {

@@ -3,6 +3,18 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 require('@electron/remote/main').initialize();
 
+// Add FFmpeg path configuration
+const getFfmpegPath = () => {
+    if (process.env.NODE_ENV === 'development') {
+        return '/opt/homebrew/bin/ffmpeg';  // Local development path
+    }
+    // In production, use the bundled ffmpeg
+    return path.join(process.resourcesPath, 'ffmpeg');
+};
+
+// Set FFmpeg path for fluent-ffmpeg
+ffmpeg.setFfmpegPath(getFfmpegPath());
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 800,
