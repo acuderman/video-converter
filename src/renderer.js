@@ -37,7 +37,7 @@ const defaultSettings = {
     videoBitrate: 3000,
     audioBitrate: 128,
     bufferSize: 6000,
-    suffix: ""
+    suffix: "_c"
 };
 
 let currentSettings = { ...defaultSettings };
