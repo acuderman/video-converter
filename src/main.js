@@ -8,7 +8,7 @@ const shell = require('electron').shell;
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
     // For development, check both common FFmpeg locations
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production') { // TODO: NODE_ENV is always undefined
         const possiblePaths = [
             '/opt/homebrew/bin/ffmpeg',    // M1/M2 Mac Homebrew path
             '/usr/local/bin/ffmpeg',       // Intel Mac Homebrew path
@@ -56,9 +56,8 @@ function createWindow() {
     require('@electron/remote/main').enable(win.webContents);
     win.loadFile(path.join(__dirname, 'index.html'));
 
-    if (process.env.NODE_ENV !== 'production') {
-        win.webContents.openDevTools();
-    }
+    console.log('node env:', process.env.NODE_ENV);
+    // win.webContents.openDevTools();
 
     win.webContents.setWindowOpenHandler((edata) => {
         shell.openExternal(edata.url);
