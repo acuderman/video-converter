@@ -99,7 +99,7 @@ jobs:
           ### Method 1: Quick Install (Terminal)
           1. Download and install the app
           2. Open Terminal
-          3. Run: `xattr -cr "/Applications/Video Converter.app"`
+          3. Run: `sudo xattr -cr "/Applications/Video Converter.app"`
           4. Open the app from Applications folder
           
           ### Method 2: Manual Install
