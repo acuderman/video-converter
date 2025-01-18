@@ -55,7 +55,9 @@ function createWindow() {
     require('@electron/remote/main').enable(win.webContents);
     win.loadFile(path.join(__dirname, 'index.html'));
 
-    win.webContents.openDevTools();
+    if (process.env.NODE_ENV !== 'production') {
+        win.webContents.openDevTools();
+    }
 
     win.once('ready-to-show', () => {
         win.show();
