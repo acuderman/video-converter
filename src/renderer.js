@@ -25,7 +25,6 @@ fileInput.addEventListener('change', (e) => {
     handleFiles(e.target.files);
 });
 
-// Add queue management
 let processingQueue = [];
 let isProcessing = false;
 let outputDirectory = null;
@@ -62,7 +61,6 @@ async function processNextInQueue() {
         return;
     }
 
-    // If we don't have an output directory yet, ask for it
     if (!outputDirectory) {
         const selected = await selectOutputDirectory();
         if (!selected) {
@@ -75,22 +73,20 @@ async function processNextInQueue() {
 
     isProcessing = true;
     const nextFile = processingQueue[0];
-    
+
     status.textContent = `Processing ${nextFile.name} (${processingQueue.indexOf(nextFile) + 1}/${processingQueue.length})`;
     progress.style.display = 'block';
-    
+
     const path = require('path');
     const outputPath = path.join(outputDirectory, nextFile.name.replace(/\.[^/.]+$/, "") + currentSettings.suffix + ".mp4");
-    
+
     if (nextFile.path) {
-        // For files selected through file dialog
         ipcRenderer.send('process-video', {
             inputPath: nextFile.path,
             outputPath: outputPath,
             settings: currentSettings
         });
     } else {
-        // For drag and dropped files
         const tempPath = path.join(require('os').tmpdir(), nextFile.name);
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -110,7 +106,7 @@ function addToQueue(files) {
         processingQueue.push(file);
         updateQueueDisplay();
     });
-    
+
     processNextInQueue();
 }
 
@@ -126,7 +122,6 @@ function updateQueueDisplay() {
     }
 }
 
-// Add a button to change output directory
 function addChangeDirectoryButton() {
     const buttonContainer = document.getElementById('buttonContainer');
     const button = document.createElement('button');
@@ -141,13 +136,17 @@ function addChangeDirectoryButton() {
     buttonContainer.appendChild(button);
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("DOMContentLoaded")
+
     initializeSettings();
     addChangeDirectoryButton();
+
+    const versionElement = document.getElementById('appVersion');
+    const appVersion = await ipcRenderer.invoke('get-app-version');
+    versionElement.textContent = `Version: ${appVersion}`;
 });
 
-// Keep your existing event listeners and IPC handlers
 ipcRenderer.on('conversion-progress', (event, percent) => {
     progressBar.style.width = `${percent}%`;
 });
@@ -174,7 +173,6 @@ function handleFiles(files) {
     addToQueue(files);
 }
 
-// Add this function to update the output folder display
 function updateOutputFolderDisplay() {
     const outputFolderDisplay = document.getElementById('outputFolderDisplay');
     if (outputDirectory) {
@@ -186,19 +184,16 @@ function updateOutputFolderDisplay() {
     }
 }
 
-// Add these functions
 function initializeSettings() {
-    // Toggle settings visibility
     const settingsHeader = document.getElementById('settingsHeader');
     const settingsContent = document.getElementById('settingsContent');
     const arrow = settingsHeader.querySelector('span');
-    
+
     settingsHeader.addEventListener('click', () => {
         settingsContent.classList.toggle('show');
         arrow.textContent = settingsContent.classList.contains('show') ? '▼' : '▶';
     });
 
-    // Initialize all inputs with default values
     Object.keys(defaultSettings).forEach(setting => {
         const element = document.getElementById(setting);
         if (element) {
@@ -209,7 +204,6 @@ function initializeSettings() {
         }
     });
 
-    // Reset button
     document.getElementById('resetSettings').addEventListener('click', () => {
         currentSettings = { ...defaultSettings };
         Object.keys(defaultSettings).forEach(setting => {
@@ -220,32 +214,3 @@ function initializeSettings() {
         });
     });
 }
-
-function processVideo(inputPath) {
-    const settings = {
-        scale: parseInt(document.getElementById('resolution').value),
-        crf: parseInt(document.getElementById('quality').value),
-        preset: document.getElementById('preset').value,
-        videoBitrate: parseInt(document.getElementById('videoBitrate').value),
-        audioBitrate: parseInt(document.getElementById('audioBitrate').value),
-        bufferSize: parseInt(document.getElementById('bufferSize').value),
-        suffix: document.getElementById('suffix').value.trim() // Get suffix value
-    };
-
-    // Get the file extension
-    const ext = path.extname(inputPath);
-    // Get the file name without extension
-    const basename = path.basename(inputPath, ext);
-    // Create output path with optional suffix
-    const outputPath = path.join(
-        path.dirname(inputPath),
-        `${basename}${settings.suffix}${ext}`
-    );
-
-    // Send to main process
-    ipcRenderer.send('process-video', {
-        inputPath,
-        outputPath,
-        settings
-    });
-} 

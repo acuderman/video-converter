@@ -63,8 +63,14 @@ jobs:
             ;;
         esac
         
+        echo "new_version_plain=$NEW_VERSION" >> $GITHUB_OUTPUT
         echo "new_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
         echo "New version will be: v$NEW_VERSION"
+
+    - name: Update package.json version
+      run: |
+        NEW_VERSION=${{ steps.bump_version.outputs.new_version_plain }}
+        jq ".version = \"$NEW_VERSION\"" package.json > tmp.$$.json && mv tmp.$$.json package.json
 
     - name: Install dependencies
       run: npm install

@@ -55,6 +55,8 @@ function createWindow() {
     require('@electron/remote/main').enable(win.webContents);
     win.loadFile(path.join(__dirname, 'index.html'));
 
+    win.webContents.openDevTools();
+
     win.once('ready-to-show', () => {
         win.show();
     });
@@ -66,6 +68,10 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
 });
 
 ipcMain.on('process-video', (event, data) => {
