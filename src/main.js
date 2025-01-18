@@ -3,6 +3,7 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 require('@electron/remote/main').initialize();
+const shell = require('electron').shell;
 
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
@@ -58,6 +59,11 @@ function createWindow() {
     if (process.env.NODE_ENV !== 'production') {
         win.webContents.openDevTools();
     }
+
+    win.webContents.setWindowOpenHandler((edata) => {
+        shell.openExternal(edata.url);
+        return { action: "deny" };
+    });
 
     win.once('ready-to-show', () => {
         win.show();
