@@ -15,14 +15,14 @@ dropZone.addEventListener('dragover', (e) => {
     e.stopPropagation();
 });
 
-dropZone.addEventListener('drop', (e) => {
+dropZone.addEventListener('drop', async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    handleFiles(e.dataTransfer.files);
+    await handleFiles(e.dataTransfer.files);
 });
 
-fileInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
+fileInput.addEventListener('change', async (e) => {
+    await handleFiles(e.target.files);
 });
 
 let processingQueue = [];
@@ -51,6 +51,9 @@ async function selectOutputDirectory() {
     if (!result.canceled && result.filePaths.length > 0) {
         outputDirectory = result.filePaths[0];
         updateOutputFolderDisplay();
+
+        document.getElementById('fileInput').disabled = false;
+
         return true;
     }
     return false;
@@ -101,13 +104,13 @@ async function processNextInQueue() {
     }
 }
 
-function addToQueue(files) {
+async function addToQueue(files) {
     Array.from(files).forEach(file => {
         processingQueue.push(file);
         updateQueueDisplay();
     });
 
-    processNextInQueue();
+    await processNextInQueue();
 }
 
 function updateQueueDisplay() {
@@ -137,40 +140,83 @@ function addChangeDirectoryButton() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("DOMContentLoaded")
-
     initializeSettings();
     addChangeDirectoryButton();
 
     const versionElement = document.getElementById('appVersion');
     const appVersion = await ipcRenderer.invoke('get-app-version');
     versionElement.textContent = `Version: ${appVersion}`;
+
+    await checkForNewRelease(appVersion);
+
+    const VERSION_CHECK_INTERVAL = 300_000; // 5 minutes
+    setInterval(async () => {
+        await checkForNewRelease(appVersion);
+    }, VERSION_CHECK_INTERVAL);
+
+    const fileInput = document.getElementById('fileInput');
+    if (!outputDirectory) {
+        fileInput.disabled = true;
+    }
 });
+
+async function checkForNewRelease(currentVersion) {
+    try {
+        const response = await fetch('https://api.github.com/repos/acuderman/video-converter/releases/latest');
+        const data = await response.json();
+        const latestVersion = data.tag_name.replace(/^v/, ''); // Remove 'v' prefix if present
+
+        if (isNewerVersion(latestVersion, currentVersion)) {
+            const newReleaseText = document.getElementById('newRelease');
+            newReleaseText.style.display = 'inline';
+        }
+    } catch (error) {
+        console.error('Error fetching latest release:', error);
+    }
+}
+
+function isNewerVersion(latest, current) {
+    const latestParts = latest.split('.').map(Number);
+    const currentParts = current.split('.').map(Number);
+
+    const currentNonZeroIndex = currentParts.findIndex(part => part !== 0);
+    if (currentNonZeroIndex === -1) {
+        return false;
+    }
+    return currentParts[currentNonZeroIndex] < (latestParts[currentNonZeroIndex] || 0);
+}
 
 ipcRenderer.on('conversion-progress', (event, percent) => {
     progressBar.style.width = `${percent}%`;
 });
 
-ipcRenderer.on('conversion-complete', (event, outputPath) => {
+ipcRenderer.on('conversion-complete', async (event, outputPath) => {
     status.textContent = `Completed: ${processingQueue[0].name}`;
-    processingQueue.shift();
-    isProcessing = false;
-    progressBar.style.width = '0%';
-    updateQueueDisplay();
-    processNextInQueue();
+    resetProcessing()
+    await processNextInQueue();
 });
 
-ipcRenderer.on('conversion-error', (event, error) => {
+ipcRenderer.on('conversion-cancelled', async (event, error) => {
+    status.textContent = `Cancelled processing ${processingQueue[0].name}: ${error}`;
+    resetProcessing();
+    await processNextInQueue();
+});
+
+ipcRenderer.on('conversion-error', async (event, error) => {
     status.textContent = `Error processing ${processingQueue[0].name}: ${error}`;
+    resetProcessing();
+    await processNextInQueue();
+});
+
+function resetProcessing() {
     processingQueue.shift();
     isProcessing = false;
     progressBar.style.width = '0%';
     updateQueueDisplay();
-    processNextInQueue();
-});
+}
 
-function handleFiles(files) {
-    addToQueue(files);
+async function handleFiles(files) {
+    await addToQueue(files);
 }
 
 function updateOutputFolderDisplay() {
@@ -178,9 +224,10 @@ function updateOutputFolderDisplay() {
     if (outputDirectory) {
         outputFolderDisplay.textContent = `Output Folder: ${outputDirectory}`;
         outputFolderDisplay.style.display = 'block';
+        outputFolderDisplay.style.color = '#666';
     } else {
         outputFolderDisplay.textContent = 'No output folder selected';
-        outputFolderDisplay.style.color = '#666';
+        outputFolderDisplay.style.color = 'red';
     }
 }
 

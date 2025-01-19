@@ -122,34 +122,56 @@
         .reset-button:hover {
             background-color: #555;
         }
+
+        .version-container {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-version {
+            font-weight: bold;
+        }
+
+        .view-versions-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .view-versions-link:hover {
+            text-decoration: underline;
+        }
+
+        .new-release {
+            display: none;
+            color: #ff0000;
+            font-weight: bold;
+            background-color: #ffe6e6;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <h1>Video Converter</h1>
-    <div id="versionContainer" style="position: fixed; bottom: 10px; right: 10px; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-        <span id="appVersion" style="font-weight: bold; margin-right: 10px;"></span>
-        <a href="https://github.com/acuderman/video-converter/releases" target="_blank" style="color: #007bff; text-decoration: none;">View all versions</a>
+    <div id="versionContainer" class="version-container">
+        <span id="appVersion" class="app-version"></span>
+        <a href="https://github.com/acuderman/video-converter/releases" target="_blank" class="view-versions-link">View all versions</a>
+        <a id="newRelease" href="https://github.com/acuderman/video-converter/releases/latest" target="_blank" class="new-release">New version available</a>
     </div>
     
     <div class="info-container">
-        <div id="outputFolderDisplay">No output folder selected</div>
+        <div id="outputFolderDisplay" style="color:red;">No output folder selected</div>
         <div id="buttonContainer"></div>
     </div>
-
-    <div class="drop-zone" id="dropZone">
-        Drop video files here or click to select.
-        <input type="file" id="fileInput" accept="video/*" style="display: none;" multiple>
-    </div>
-
-    <div class="info-container">
-        <div id="queueStatus"></div>
-        <div class="progress" id="progress">
-            <div class="progress-bar" id="progressBar"></div>
-        </div>
-        <div id="status"></div>
-    </div>
-
-    <div id="fileList"></div>
 
     <div class="settings-container">
         <div class="settings-header" id="settingsHeader">
@@ -205,6 +227,21 @@
             </div>
         </div>
     </div>
+
+    <div class="drop-zone" id="dropZone">
+        Drop video files here or click to select. Conversion starts automatically.
+        <input type="file" id="fileInput" accept="video/*" style="display: none;" multiple>
+    </div>
+
+    <div class="info-container">
+        <div id="queueStatus"></div>
+        <div class="progress" id="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div id="status"></div>
+    </div>
+
+    <div id="fileList"></div>
 
     <script src="renderer.js"></script>
 </body>

@@ -4,6 +4,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 require('@electron/remote/main').initialize();
 const shell = require('electron').shell;
+const { dialog } = require('electron');
 
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
@@ -56,7 +57,6 @@ function createWindow() {
     require('@electron/remote/main').enable(win.webContents);
     win.loadFile(path.join(__dirname, 'index.html'));
 
-    console.log('node env:', process.env.NODE_ENV);
     // win.webContents.openDevTools();
 
     win.webContents.setWindowOpenHandler((edata) => {
@@ -81,7 +81,7 @@ ipcMain.handle('get-app-version', () => {
     return app.getVersion();
 });
 
-ipcMain.on('process-video', (event, data) => {
+ipcMain.on('process-video', async (event, data) => {
     if (!data.inputPath) {
         event.reply('conversion-error', 'No input file path provided');
         return;
@@ -90,7 +90,22 @@ ipcMain.on('process-video', (event, data) => {
     console.log('Processing file:', data.inputPath);
     console.log('Output file:', data.outputPath);
     console.log('Settings:', data.settings);
-    
+
+    if (fs.existsSync(data.outputPath)) {
+        const { canceled, filePath: newFilePath } = await dialog.showSaveDialog({
+            title: 'Save As',
+            defaultPath: data.outputPath,
+            message: 'The file already exists. Please choose a new path to save the file or overwrite the existing one.'
+        });
+
+        if (canceled || !newFilePath) {
+            event.reply('conversion-cancelled', `No file path selected`);
+            return;
+        }
+
+        data.outputPath = newFilePath;
+    }
+
     try {
         ffmpeg(data.inputPath)
             .outputOptions([
