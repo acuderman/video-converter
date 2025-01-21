@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, powerSaveBlocker } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
@@ -41,6 +41,8 @@ console.log('Path exists:', fs.existsSync(ffmpegPath));
 // Set FFmpeg path for fluent-ffmpeg
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+let powerSaveId;
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 800,
@@ -67,6 +69,8 @@ function createWindow() {
     win.once('ready-to-show', () => {
         win.show();
     });
+
+    powerSaveId = powerSaveBlocker.start('prevent-app-suspension');
 }
 
 app.whenReady().then(createWindow);
@@ -74,6 +78,13 @@ app.whenReady().then(createWindow);
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
+    }
+});
+
+app.on('before-quit', () => {
+    // Stop the power save blocker when the app is about to quit
+    if (powerSaveBlocker.isStarted(powerSaveId)) {
+        powerSaveBlocker.stop(powerSaveId);
     }
 });
 

@@ -77,7 +77,7 @@ async function processNextInQueue() {
     isProcessing = true;
     const nextFile = processingQueue[0];
 
-    status.textContent = `Processing ${nextFile.name} (${processingQueue.indexOf(nextFile) + 1}/${processingQueue.length})`;
+    status.textContent = `Processing ${nextFile.name}`;
     progress.style.display = 'block';
 
     const path = require('path');
@@ -123,6 +123,8 @@ function updateQueueDisplay() {
     } else {
         queueStatus.textContent = outputDirectory ? `Output folder: ${outputDirectory}` : '';
     }
+
+    updateRemainingFilesDisplay();
 }
 
 function addChangeDirectoryButton() {
@@ -229,6 +231,17 @@ function updateOutputFolderDisplay() {
         outputFolderDisplay.textContent = 'No output folder selected';
         outputFolderDisplay.style.color = 'red';
     }
+}
+
+function updateRemainingFilesDisplay() {
+    const remainingFilesList = document.getElementById('remainingFilesList');
+    remainingFilesList.innerHTML = '';
+
+    processingQueue.forEach(file => {
+        const listItem = document.createElement('li');
+        listItem.textContent = file.name;
+        remainingFilesList.appendChild(listItem);
+    });
 }
 
 function initializeSettings() {
