@@ -1,3 +1,5 @@
+process.env.NODE_OPTIONS = '--max-old-space-size=4096';
+
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
