@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron');
+const semver = require('semver');
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -178,14 +179,7 @@ async function checkForNewRelease(currentVersion) {
 }
 
 function isNewerVersion(latest, current) {
-    const latestParts = latest.split('.').map(Number);
-    const currentParts = current.split('.').map(Number);
-
-    const currentNonZeroIndex = currentParts.findIndex(part => part !== 0);
-    if (currentNonZeroIndex === -1) {
-        return false;
-    }
-    return currentParts[currentNonZeroIndex] < (latestParts[currentNonZeroIndex] || 0);
+    return semver.gt(latest, current);
 }
 
 ipcRenderer.on('conversion-progress', (event, percent) => {

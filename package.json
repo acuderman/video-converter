@@ -11,7 +11,10 @@
     "appId": "com.your.videoconverter",
     "productName": "Video Converter",
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "identity": null
     },
     "dmg": {
@@ -26,11 +29,12 @@
     }
   },
   "dependencies": {
+    "@electron/remote": "latest",
     "fluent-ffmpeg": "latest",
-    "@electron/remote": "latest"
+    "semver": "^7.6.3"
   },
   "devDependencies": {
     "electron": "latest",
     "electron-builder": "latest"
   }
-} 
+}
