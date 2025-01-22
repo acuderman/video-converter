@@ -6,6 +6,7 @@ require('@electron/remote/main').initialize();
 const shell = require('electron').shell;
 const { dialog } = require('electron');
 
+
 // Add FFmpeg path configuration
 const getFfmpegPath = () => {
     // For development, check both common FFmpeg locations

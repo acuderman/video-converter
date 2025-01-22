@@ -1,5 +1,6 @@
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, webUtils } = require('electron');
 const semver = require('semver');
+const path = require("path");
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -84,24 +85,17 @@ async function processNextInQueue() {
     const path = require('path');
     const outputPath = path.join(outputDirectory, nextFile.name.replace(/\.[^/.]+$/, "") + currentSettings.suffix + ".mp4");
 
-    if (nextFile.path) {
+    const filePath = webUtils.getPathForFile(nextFile);
+    nextFile.path = filePath;
+
+    if (filePath) {
         ipcRenderer.send('process-video', {
-            inputPath: nextFile.path,
+            inputPath: filePath,
             outputPath: outputPath,
             settings: currentSettings
         });
     } else {
-        const tempPath = path.join(require('os').tmpdir(), nextFile.name);
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            require('fs').writeFileSync(tempPath, Buffer.from(e.target.result));
-            ipcRenderer.send('process-video', {
-                inputPath: tempPath,
-                outputPath: outputPath,
-                settings: currentSettings
-            });
-        };
-        reader.readAsArrayBuffer(nextFile);
+        status.textContent = `Critical error processing ${nextFile.name}: Could not get file path.`;
     }
 }
 
