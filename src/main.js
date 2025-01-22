@@ -1,5 +1,3 @@
-process.env.NODE_OPTIONS = '--max-old-space-size=4096';
-
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
@@ -59,7 +57,7 @@ function createWindow() {
     require('@electron/remote/main').enable(win.webContents);
     win.loadFile(path.join(__dirname, 'index.html'));
 
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 
     win.webContents.setWindowOpenHandler((edata) => {
         shell.openExternal(edata.url);
